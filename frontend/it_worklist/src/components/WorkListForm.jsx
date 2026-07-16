@@ -8,6 +8,9 @@ function WorkListForm() {
   const [editingId, setEditingId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Mobile responsive state
+  const [showMobileForm, setShowMobileForm] = useState(false);
 
   const [form, setForm] = useState({
     Description: "",
@@ -61,6 +64,7 @@ function WorkListForm() {
 
       await fetchData();
       resetForm();
+      setShowMobileForm(false); // Return to list view on mobile after save
     } catch (err) {
       setError(err.message);
       console.error(err);
@@ -78,6 +82,8 @@ function WorkListForm() {
       Type: item.Type || item.type || "User",
       Active_Inactive: activeVal === 1 || activeVal === true,
     });
+    
+    setShowMobileForm(true); // Switch to form view on mobile
   };
 
   const handleDelete = async (itemId) => {
@@ -108,15 +114,43 @@ function WorkListForm() {
     });
   };
 
+  // Navigation handler
+  const handleGoHome = () => {
+    // If using react-router-dom, replace with: navigate('/')
+    window.location.href = '/'; 
+  };
+
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-slate-50 font-sans">
+    // Fixed screen container (h-screen, overflow-hidden)
+    <div className="flex flex-col lg:flex-row h-screen overflow-hidden bg-slate-50 font-sans w-full">
       
       {/* --- Left Panel: Form & Controls --- */}
-      <div className="w-full lg:w-[400px] bg-white border-r border-slate-200 flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10">
-        <div className="p-8 flex-grow">
+      <div className={`
+        ${showMobileForm ? 'flex' : 'hidden'} 
+        lg:flex w-full lg:w-[400px] bg-white border-r border-slate-200 flex-col shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10 h-full overflow-y-auto
+      `}>
+        <div className="p-6 lg:p-8 grow flex flex-col">
           
+          {/* Desktop Back to Home */}
+          <button 
+            onClick={handleGoHome}
+            className="hidden lg:flex mb-6 text-slate-500 hover:text-indigo-600 items-center gap-2 font-medium text-sm transition-colors w-max"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Back to Home
+          </button>
+
+          {/* Mobile Back Button (To Records) */}
+          <button 
+            onClick={() => { setShowMobileForm(false); resetForm(); }}
+            className="lg:hidden mb-6 text-slate-500 hover:text-slate-800 flex items-center gap-2 font-medium bg-slate-50 p-2 rounded-lg w-max transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Back to Records
+          </button>
+
           {/* Header */}
-          <div className="mb-10">
+          <div className="mb-8">
             <div className="w-12 h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-indigo-200">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
             </div>
@@ -127,7 +161,7 @@ function WorkListForm() {
           {/* Form */}
           <div className={`p-6 rounded-2xl transition-all duration-300 ${editingId ? 'bg-indigo-50/50 border border-indigo-100' : 'bg-slate-50 border border-slate-100'}`}>
             <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 flex items-center gap-2">
-              {editingId ? <span className="text-indigo-600">✏️ Editing Record #{editingId}</span> : "✨ New Record"}
+              {editingId ? <span className="text-indigo-600">✏️ Editing #{editingId}</span> : "✨ New Record"}
             </h2>
             
             <form onSubmit={submit} className="space-y-5">
@@ -212,7 +246,7 @@ function WorkListForm() {
         </div>
         
         {/* Footer info inside sidebar */}
-        <div className="p-6 border-t border-slate-100 bg-slate-50/50">
+        <div className="p-6 border-t border-slate-100 bg-slate-50/50 mt-auto shrink-0">
           <p className="text-xs text-slate-400 text-center flex items-center justify-center gap-1">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             System Online • API v1.2
@@ -220,12 +254,24 @@ function WorkListForm() {
         </div>
       </div>
 
-      {/* --- Right Panel: Data Table --- */}
-      <div className="flex-1 h-screen overflow-y-auto p-6 lg:p-10 relative">
+      {/* --- Right Panel: Data Table/Cards --- */}
+      <div className={`
+        ${showMobileForm ? 'hidden' : 'flex'} 
+        lg:flex flex-1 flex-col h-full bg-slate-50 relative p-4 sm:p-6 lg:p-10
+      `}>
         
+        {/* Mobile Back to Home */}
+        <button 
+          onClick={handleGoHome}
+          className="lg:hidden mb-4 text-slate-500 hover:text-indigo-600 flex items-center gap-2 font-medium text-sm transition-colors w-max"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          Back to Home
+        </button>
+
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl shadow-sm flex justify-between items-center animate-in fade-in slide-in-from-top-4">
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl shadow-sm flex justify-between items-center shrink-0">
             <div className="flex items-center gap-3">
               <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"></path></svg>
               <span className="font-medium text-sm">{error}</span>
@@ -236,94 +282,158 @@ function WorkListForm() {
           </div>
         )}
 
-        <div className="flex items-center justify-between mb-8">
+        {/* Right Panel Header */}
+        <div className="flex items-center justify-between mb-6 lg:mb-8 shrink-0">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Database Records</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Database Records</h2>
             <p className="text-slate-500 text-sm mt-1">Showing {workListData.length} entries</p>
           </div>
           
-          {isLoading && (
-            <div className="flex items-center gap-2 text-sm text-indigo-600 font-semibold bg-indigo-50 px-4 py-2 rounded-full">
-              <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-              Syncing
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            {isLoading && (
+              <div className="hidden sm:flex items-center gap-2 text-sm text-indigo-600 font-semibold bg-indigo-50 px-4 py-2 rounded-full">
+                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                Syncing
+              </div>
+            )}
+            
+            {/* Mobile "Add Record" Button */}
+            <button 
+              onClick={() => { resetForm(); setShowMobileForm(true); }}
+              className="lg:hidden bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm shadow-sm transition-colors flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"></path></svg>
+              Add New
+            </button>
+          </div>
         </div>
 
-        {/* Table Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider font-bold">
-                  <th className="p-4 pl-6 w-20">ID</th>
-                  <th className="p-4">Description</th>
-                  <th className="p-4">Type</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4 pr-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-sm">
-                {workListData.length === 0 && !isLoading ? (
-                  <tr>
-                    <td colSpan="5" className="p-16 text-center">
-                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4">
-                        <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                      </div>
-                      <h3 className="text-slate-900 font-semibold mb-1">No records found</h3>
-                      <p className="text-slate-500">Create a new item in the panel to get started.</p>
-                    </td>
-                  </tr>
-                ) : (
-                  workListData.map((item, index) => {
-                    const itemId = item.ID || item.id;
-                    const itemDescription = item.Description || item.description || "";
-                    const itemType = item.Type || item.type || "";
-                    const rawActive = item.active_inactive !== undefined ? item.active_inactive : item.Active_Inactive;
-                    const isActive = rawActive === 1 || rawActive === true;
+        {/* --- Scrollable Content Area --- */}
+        <div className="flex-1 overflow-y-auto min-h-0 pb-10 pr-1 rounded-xl">
+          
+          {workListData.length === 0 && !isLoading ? (
+             <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center h-full flex flex-col justify-center items-center">
+               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4">
+                 <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+               </div>
+               <h3 className="text-slate-900 font-semibold mb-1">No records found</h3>
+               <p className="text-slate-500 text-sm">Create a new item in the panel to get started.</p>
+             </div>
+          ) : (
+            <>
+              {/* DESKTOP VIEW: Table (Hidden on devices smaller than md) */}
+              <div className="hidden md:block bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider font-bold">
+                      <th className="p-4 pl-6 w-20">ID</th>
+                      <th className="p-4">Description</th>
+                      <th className="p-4">Type</th>
+                      <th className="p-4">Status</th>
+                      <th className="p-4 pr-6 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-sm">
+                    {workListData.map((item, index) => {
+                      const itemId = item.ID || item.id;
+                      const itemDescription = item.Description || item.description || "";
+                      const itemType = item.Type || item.type || "";
+                      const rawActive = item.active_inactive !== undefined ? item.active_inactive : item.Active_Inactive;
+                      const isActive = rawActive === 1 || rawActive === true;
 
-                    return (
-                      <tr key={itemId || index} className="hover:bg-slate-50/80 transition-colors group">
-                        <td className="p-4 pl-6 font-medium text-slate-400">#{itemId}</td>
-                        <td className="p-4 font-semibold text-slate-900">{itemDescription}</td>
-                        <td className="p-4">
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 font-medium">
-                            {itemType}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold uppercase tracking-wide rounded-full border ${
-                            isActive 
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
-                              : "bg-slate-50 text-slate-500 border-slate-200"
-                          }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-emerald-500" : "bg-slate-400"}`}></span>
-                            {isActive ? "Active" : "Inactive"}
-                          </span>
-                        </td>
-                        <td className="p-4 pr-6 text-right space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                      return (
+                        <tr key={`table-${itemId || index}`} className="hover:bg-slate-50/80 transition-colors group">
+                          <td className="p-4 pl-6 font-medium text-slate-400">#{itemId}</td>
+                          <td className="p-4 font-semibold text-slate-900">{itemDescription}</td>
+                          <td className="p-4">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 font-medium text-xs">
+                              {itemType}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold uppercase tracking-wide rounded-full border ${
+                              isActive 
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
+                                : "bg-slate-50 text-slate-500 border-slate-200"
+                            }`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-emerald-500" : "bg-slate-400"}`}></span>
+                              {isActive ? "Active" : "Inactive"}
+                            </span>
+                          </td>
+                          <td className="p-4 pr-6 text-right space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => handleEdit(item)}
+                              className="text-indigo-600 hover:text-indigo-900 font-semibold p-2 hover:bg-indigo-50 rounded-lg transition-colors"
+                              title="Edit"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            </button>
+                            <button
+                              onClick={() => handleDelete(itemId)}
+                              className="text-rose-500 hover:text-rose-700 font-semibold p-2 hover:bg-rose-50 rounded-lg transition-colors"
+                              title="Delete"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* MOBILE VIEW: Cards (Hidden on devices larger than md) */}
+              <div className="block md:hidden space-y-4">
+                {workListData.map((item, index) => {
+                  const itemId = item.ID || item.id;
+                  const itemDescription = item.Description || item.description || "";
+                  const itemType = item.Type || item.type || "";
+                  const rawActive = item.active_inactive !== undefined ? item.active_inactive : item.Active_Inactive;
+                  const isActive = rawActive === 1 || rawActive === true;
+
+                  return (
+                    <div key={`card-${itemId || index}`} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="pr-4">
+                          <span className="text-xs font-bold text-slate-400 mb-1 block">#{itemId}</span>
+                          <h3 className="font-semibold text-slate-900 leading-tight">{itemDescription}</h3>
+                        </div>
+                        <div className="flex space-x-1 shrink-0">
                           <button
                             onClick={() => handleEdit(item)}
-                            className="text-indigo-600 hover:text-indigo-900 font-semibold p-2 hover:bg-indigo-50 rounded-lg transition-colors"
-                            title="Edit"
+                            className="text-indigo-600 p-2 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                           </button>
                           <button
                             onClick={() => handleDelete(itemId)}
-                            className="text-rose-500 hover:text-rose-700 font-semibold p-2 hover:bg-rose-50 rounded-lg transition-colors"
-                            title="Delete"
+                            className="text-rose-500 p-2 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                           </button>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-medium">
+                          {itemType}
+                        </span>
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide rounded-full border ${
+                          isActive 
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
+                            : "bg-slate-50 text-slate-500 border-slate-200"
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-emerald-500" : "bg-slate-400"}`}></span>
+                          {isActive ? "Active" : "Inactive"}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
