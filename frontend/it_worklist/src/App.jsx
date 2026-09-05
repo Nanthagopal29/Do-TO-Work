@@ -4,7 +4,7 @@ import {
   Route,
 } from "react-router-dom";
 
-import Home from "./components/home";
+import W_Home from "./components/W_Home";
 import UserSelect from "./components/WorkUser";
 import UserReports from "./components/UserReports";
 import WorkListForm from "./components/WorkListForm";
@@ -16,7 +16,7 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<W_Home />} />
         <Route path="/dashboard" element={<UserSelect />} />
         <Route path="/user_reports" element={<UserReports />} />
         <Route path="/work-entry/:username" element={<WorkEntryForm />} />
